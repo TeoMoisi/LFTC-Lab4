@@ -16,16 +16,17 @@ class Grammar:
         line = f.readline().strip("\n")
         i = 0
         while line != "":
+            # TODO: keep rhs as a list and slip by spaces!
             line = line.split("->")
             if line[0] not in self.P:
                 self.P[line[0]] = []
             rhs = line[1].split("|")
             for elem in rhs:
-                self.P[line[0]].append((elem, i))
+                self.P[line[0]].append((elem.split(" "), i))
                 i += 1
             line = f.readline().strip("\n")
 
     def get_productions_for_non_terminal(self, non_terminal):
         if non_terminal not in self.P:
-            return None
+            return []
         return self.P[non_terminal]

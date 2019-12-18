@@ -13,19 +13,20 @@ class LR0Algorithm:
         self.states = []  # list of states, each state has a list of lists lhs, rhs, i (i=dot)
         self.transitions_table = {}  # key: state, value: list of Action
 
-    def check_conflicts(self, action, ex_state_nr, next_state_nr):
-        if ex_state_nr in self.transitions_table:
-            for existent in self.transitions_table[ex_state_nr]:
+    def check_conflicts(self, action, state_nr, next_state_nr, printing=False):
+        if printing:
+            print(self.transitions_table[state_nr])
+
+        if state_nr in self.transitions_table:
+            for existent in self.transitions_table[state_nr]:
                 if existent.name == "reduce":
                     if action.name == "reduce":
-                        raise Exception("Reduce reduce conflict in state " + str(ex_state_nr) + " current states: " + str(next_state_nr))
+                        raise Exception("Reduce reduce conflict in state " + str(state_nr) + " current state: " + str(next_state_nr))
                     if action.name == "shift":
-                        raise Exception("Shift reduce conflict in state " + str(ex_state_nr) + " current states: " + str(next_state_nr))
+                        raise Exception("Shift reduce conflict in state " + str(state_nr) + " current state: " + str(next_state_nr))
                 elif existent.name == "shift":
                     if action.name == "reduce":
-                        raise Exception("Shift reduce conflict in state " + str(ex_state_nr) + " current states: " + str(next_state_nr))
-                    if action.name == "shift" and action.symbol == existent.symbol:
-                        raise Exception("Shift shift conflict in state " + str(ex_state_nr) + " on symbol " + action.symbol + " current states: " + str(next_state_nr) + " on symbol(" + action.symbol + ")")
+                        raise Exception("Shift reduce conflict in state " + str(state_nr) + " current state: " + str(next_state_nr))
 
     def closure(self, states_set):
         result = states_set
@@ -63,7 +64,7 @@ class LR0Algorithm:
 
     def canonical_collection(self):
         s0 = self.closure([
-            ["S\'", 'S', 0]
+            ["S\'", [self.grammar.S], 0]
         ])
         self.states.append(s0)
 
@@ -107,7 +108,8 @@ class LR0Algorithm:
                         self.states.append(next_state)
 
                     action = ShiftAction(i, new_state_number, symbol)
-
+                if i == 2 and new_state_number == 23:
+                    self.check_conflicts(action, i, new_state_number, True)
                 if i not in self.transitions_table.keys():
                     self.transitions_table[i] = [action]
                 else:
@@ -116,7 +118,7 @@ class LR0Algorithm:
 
             i += 1
 
-        # print the transitions (just for debugging)
+        # # print the transitions (just for debugging)
         # for key in self.transitions_table.keys():
         #     for transition in self.transitions_table[key]:
         #         s = str(key) + " -> " + transition.name
@@ -201,21 +203,24 @@ class LR0Algorithm:
         if accept:
             return output
         elif error:
-            print("Grammar doesn't accept the given sequence!" + str(output))
+            raise Exception("Grammar doesn't accept the given sequence!" + str(output))
 
     def print_derivations(self, used_productions):
         first_production = self.find_production(used_productions[0])
         derivations: List[str] = [
             first_production[0],
-            first_production[1]
+            self.string_rhs(first_production[1])
         ]
         for i in range(1, len(used_productions)):
             production_number = used_productions[i]
             current_production = self.find_production(production_number)
+            rhs = self.string_rhs(current_production[1])
             next_derivation = derivations[-1][:]
-            next_derivation = next_derivation.replace(current_production[0], current_production[1], 1)
+            next_derivation = next_derivation.replace(current_production[0], rhs, 1)
             derivations.append(next_derivation)
 
         derivation_string: str = reduce(lambda x, y: x + " -> " + y, derivations)
         print(derivation_string)
 
+    def string_rhs(self, rhs_list):
+        return reduce(lambda x, y: x + y, rhs_list)

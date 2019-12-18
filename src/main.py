@@ -16,17 +16,38 @@ class Main:
 
     @staticmethod
     def step2():
-        lexical_analysis = LexicalAnalysis()
-        lexical_analysis.perform_lexical_analysis()
-        pif = [str(x[0]) for x in lexical_analysis.PIF]
-        print(pif)
+        arr = [
+        '2',
+        '40',
+        '0',
+        '37',
+        '5',
+        '38',
+        '0',
+        '24'
+        '1',
+        '38',
+        '10',
+        '31',
+        '0',
+        '32',
+        '38'
+        ]
+        # lexical_analysis = LexicalAnalysis()
+        # lexical_analysis.perform_lexical_analysis()
+        # pif = [str(x[0]) for x in lexical_analysis.PIF]
+        # print(pif)
         alg = LR0Algorithm("input/grammar.txt")
         alg.canonical_collection()
-        used_productions = alg.check_input(pif)
-        alg.print_derivations(used_productions)
+        try:
+            used_productions = alg.check_input(arr)
+            alg.print_derivations(used_productions)
+        except Exception as e:
+            print(str(e))
+
 
 
 if __name__ == '__main__':
-    Main.step1()
-    # Main.step2()
+    # Main.step1()
+    Main.step2()
 
