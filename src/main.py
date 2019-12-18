@@ -1,4 +1,5 @@
 from src.parser.lr0_algorithm import LR0Algorithm
+from src.scanner.LexicalAnalysis import LexicalAnalysis
 
 
 class Main:
@@ -16,10 +17,17 @@ class Main:
 
     @staticmethod
     def step2():
-        pass
+        lexicAnalysis = LexicalAnalysis()
+        lexicAnalysis.perform_lexical_analysis()
+        pif = [str(x[0]) for x in lexicAnalysis.PIF]
+        print(pif)
+        alg = LR0Algorithm("input/grammar.txt")
+        alg.canonical_collection()
+        outputSeq = alg.check_input(pif)
+        print("Output:", outputSeq)
 
 
 if __name__ == '__main__':
-    Main.step1()
+    #Main.step1()
     Main.step2()
 

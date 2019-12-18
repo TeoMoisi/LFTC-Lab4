@@ -36,6 +36,7 @@ class LR0Algorithm:
                 continue
 
             symbol = rhs[dot]
+            print("SYMBOL:", symbol)
             for right in self.grammar.get_productions_for_non_terminal(symbol):
                 if [symbol, right[0], 0] not in result:
                     result.append([symbol, right[0], 0])
