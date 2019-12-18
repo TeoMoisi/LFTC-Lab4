@@ -9,25 +9,24 @@ class Main:
         # print("analysis_element: " + str(analysis_element))
         # print("next state: " + str(next_state))
         # print('\n')
-        alg = LR0Algorithm("input/grammar.txt")
+        alg = LR0Algorithm("input/simple_grammar.txt")
         alg.canonical_collection()
         used_productions = alg.check_input(["a", "b", "b", "c"])
         alg.print_derivations(used_productions)
 
-
     @staticmethod
     def step2():
-        lexicAnalysis = LexicalAnalysis()
-        lexicAnalysis.perform_lexical_analysis()
-        pif = [str(x[0]) for x in lexicAnalysis.PIF]
+        lexical_analysis = LexicalAnalysis()
+        lexical_analysis.perform_lexical_analysis()
+        pif = [str(x[0]) for x in lexical_analysis.PIF]
         print(pif)
         alg = LR0Algorithm("input/grammar.txt")
         alg.canonical_collection()
-        outputSeq = alg.check_input(pif)
-        print("Output:", outputSeq)
+        used_productions = alg.check_input(pif)
+        alg.print_derivations(used_productions)
 
 
 if __name__ == '__main__':
-    #Main.step1()
-    Main.step2()
+    Main.step1()
+    # Main.step2()
 

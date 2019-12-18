@@ -1,12 +1,13 @@
 from copy import deepcopy
 from functools import reduce
+from typing import List
 
 from src.model.grammar import Grammar
 from src.parser.actions import *
 
 
 class LR0Algorithm:
-    def __init__(self, text_file):
+    def __init__(self, text_file: str):
         self.grammar = Grammar()
         self.grammar.read_grammar_file(text_file)
         self.states = []  # list of states, each state has a list of lists lhs, rhs, i (i=dot)
@@ -36,7 +37,7 @@ class LR0Algorithm:
                 continue
 
             symbol = rhs[dot]
-            print("SYMBOL:", symbol)
+            # print("SYMBOL:", symbol)
             for right in self.grammar.get_productions_for_non_terminal(symbol):
                 if [symbol, right[0], 0] not in result:
                     result.append([symbol, right[0], 0])
@@ -80,7 +81,7 @@ class LR0Algorithm:
                         action = AcceptAction(i)
                         
                     else:  # reduce
-                        productions = self.grammar.get_productions_for_non_terminal(lhs)  # iau toate productiile care match
+                        productions = self.grammar.get_productions_for_non_terminal(lhs)
                         production_number = -1
                         for production in productions:
                             if production[0] == rhs:
@@ -115,16 +116,15 @@ class LR0Algorithm:
 
             i += 1
 
-        #asta doar printeaza pe ecran tranzitiile
-        #just for debugging, se poate sterge
-        for key in self.transitions_table.keys():
-            for transition in self.transitions_table[key]:
-                s = str(key) + " -> " + transition.name
-                if transition.name == "shift":
-                    s += " with symbol " + transition.symbol + " to " + str(transition.next)
-                elif transition.name == "reduce":
-                    s += " with production " + str(transition.production_number)
-                # print(s)
+        # print the transitions (just for debugging)
+        # for key in self.transitions_table.keys():
+        #     for transition in self.transitions_table[key]:
+        #         s = str(key) + " -> " + transition.name
+        #         if transition.name == "shift":
+        #             s += " with symbol " + transition.symbol + " to " + str(transition.next)
+        #         elif transition.name == "reduce":
+        #             s += " with production " + str(transition.production_number)
+        #         print(s)
 
     def find_production(self, prod_nr):
         prod = [(x, tuple[0]) for x in self.grammar.P for tuple in self.grammar.P[x] if tuple[1] == prod_nr]
@@ -142,7 +142,7 @@ class LR0Algorithm:
                 return i
         return -1
 
-    def check_input(self, sequence):
+    def check_input(self, sequence: List[str]):
         working = [0]
         input = sequence
         output = []
@@ -199,12 +199,23 @@ class LR0Algorithm:
                 working += [head_input, action.next]
 
         if accept:
-            return list(map(lambda x: x+1, output))
+            return output
         elif error:
             print("Grammar doesn't accept the given sequence!" + str(output))
 
     def print_derivations(self, used_productions):
-        # TODO: for the given grammar, used_productions = [1, 2, 2, 3]. Create derivations string: S -> aA -> abA ->
-        #  abbA -> abbc
-        pass
+        first_production = self.find_production(used_productions[0])
+        derivations: List[str] = [
+            first_production[0],
+            first_production[1]
+        ]
+        for i in range(1, len(used_productions)):
+            production_number = used_productions[i]
+            current_production = self.find_production(production_number)
+            next_derivation = derivations[-1][:]
+            next_derivation = next_derivation.replace(current_production[0], current_production[1], 1)
+            derivations.append(next_derivation)
+
+        derivation_string: str = reduce(lambda x, y: x + " -> " + y, derivations)
+        print(derivation_string)
 
